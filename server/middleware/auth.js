@@ -2,24 +2,43 @@ const models = require('../models');
 const Promise = require('bluebird');
 
 module.exports.createSession = (req, res, next) => {
-  req.session = {};
 
   if (!req.cookies.shortlyid) {
-    console.log('i am here');
     models.Sessions.create()
-      .then(models.Model.get({userId: NULL})
-        .then((result) => {
-          console.log('###---###', result);
-        }));
-  } else {
-    req.session.hash = req.cookies.shortlyid;
-    console.log(req.session.hash);
-    models.Sessions.get({hash: req.session.hash})
       .then((result) => {
-        console.log(result);
+        var id = result.insertId;
+        models.Sessions.get({id})
+          .then((result) => {
+            req.session = result;
+            //?????res.cookies.shortlyid = req.session.hash;
+            res.cookie('shortlyid', req.session.hash);
+            next();
+          });
+      });
+  } else {
+    var hash = req.cookies.shortlyid;
+
+    models.Sessions.get({hash})
+      .then((result) => {
+        if (result) {
+          console.log(result);
+          req.session = result;
+          next();
+        } else {
+          delete req.cookies.shortlyid;
+          models.Sessions.create()
+            .then((result) => {
+              var id = result.insertId;
+              models.Sessions.get({id})
+                .then((result) => {
+                  req.session = result;
+                  res.cookie('shortlyid', req.session.hash);
+                  next();
+                });
+            });
+        }
       });
   }
-  next();
 };
 
 /************************************************************/
