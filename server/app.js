@@ -126,6 +126,7 @@ app.post('/login', (req, res) => {
 app.get('/logout', (req, res, next) => {
   var id = req.session.id;
   models.Sessions.delete( { id } );
+  res.redirect('/login');
   next();
 });
 

@@ -500,6 +500,19 @@ describe('', function() {
       requestWithSession(options, callback);
     };
 
+    var addSecondUser = function(callback) {
+
+      var options2 = {
+        'method': 'POST',
+        'uri': 'http://127.0.0.1:4568/signup',
+        'json': {
+          'usernane': 'Cat',
+          'password': 'meow'
+        }
+      };
+      requestWithSession(options, callback);
+    };
+
     beforeEach(function(done) {
       cookieJar = request.jar();
       requestWithSession = request.defaults({ jar: cookieJar });
@@ -570,7 +583,38 @@ describe('', function() {
         });
       });
     });
+
+    it('Adds a new session and checks that both current and previous sessions were saved', function(done) {
+      addSecondUser(function(err, res, body) {
+        if (err) { return done(err); }
+        var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
+        var cookieValue = cookies[0].value;
+
+        requestWithSession('http://127.0.0.1:4568/', function(err, res, body) {
+          if (err) { return done(err); }
+          var queryString = 'SELECT * FROM sessions';
+          db.query(queryString, function(error, sessions) {
+            if (error) { return done(error); }
+            expect(sessions.length).to.equal(2);
+            expect(sessions[1].userId).to.be.null;
+            done();
+          });
+        });
+      });
+    });
+
+    it('Redirects to login page if a user logged out', function(done) {
+      request('http://127.0.0.1:4568/logout', function(error, res, body) {
+        if (error) { return done(error); }
+        expect(res.req.path).to.equal('/login');
+        done();
+      });
+    });
+
   });
+
+
+
 
   xdescribe('Privileged Access:', function() {
 
