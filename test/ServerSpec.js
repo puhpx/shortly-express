@@ -536,7 +536,7 @@ describe('', function() {
 
         var queryString = `
           SELECT users.username FROM users, sessions
-          WHERE sessions.hash = ? AND users.id = sessions.userId
+          WHERE sessions.hash = ? AND users.id = sessions.id
         `;
 
         db.query(queryString, cookieValue, function(error, users) {

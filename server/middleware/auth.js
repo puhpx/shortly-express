@@ -2,7 +2,6 @@ const models = require('../models');
 const Promise = require('bluebird');
 
 module.exports.createSession = (req, res, next) => {
-  console.log('req', req);
   if (req.cookies.shortlyid === undefined) {
     models.Sessions.create()
       .then((result) => {
@@ -21,7 +20,6 @@ module.exports.createSession = (req, res, next) => {
     models.Sessions.get({hash})
       .then((result) => {
         if (result) {
-          console.log(result);
           req.session = result;
           next();
         } else {

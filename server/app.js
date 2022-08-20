@@ -81,20 +81,17 @@ app.post('/links',
 /************************************************************/
 
 app.post('/signup', (req, res) => {
-  console.log('i am here');
   var username = req.body.username;
   var password = req.body.password;
 
   return models.Users.get({username: username})
     .then((result) => {
-      console.log('------>', result);
       if (result) {
         console.log('redirect');
         res.redirect('/signup');
       } else {
         return models.Users.create({username, password})
           .then((newUser) => {
-            console.log('newUser data', newUser);
           })
           .then((newUser) => {
             res.redirect('/');
@@ -124,6 +121,12 @@ app.post('/login', (req, res) => {
         res.redirect('/login');
       }
     });
+});
+
+app.get('/logout', (req, res, next) => {
+  var id = req.session.id;
+  models.Sessions.delete( { id } );
+  next();
 });
 
 
