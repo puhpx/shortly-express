@@ -2,8 +2,8 @@ const models = require('../models');
 const Promise = require('bluebird');
 
 module.exports.createSession = (req, res, next) => {
-
-  if (!req.cookies.shortlyid) {
+  console.log('req', req);
+  if (req.cookies.shortlyid === undefined) {
     models.Sessions.create()
       .then((result) => {
         var id = result.insertId;

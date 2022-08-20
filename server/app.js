@@ -14,8 +14,8 @@ app.use(partials());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-// app.use(CookieParser);
-// app.use(Auth.createSession);
+app.use(CookieParser);
+app.use(Auth.createSession);
 
 
 
@@ -81,16 +81,21 @@ app.post('/links',
 /************************************************************/
 
 app.post('/signup', (req, res) => {
+  console.log('i am here');
   var username = req.body.username;
   var password = req.body.password;
 
   return models.Users.get({username: username})
     .then((result) => {
+      console.log('------>', result);
       if (result) {
         console.log('redirect');
         res.redirect('/signup');
       } else {
-        models.Users.create({username, password})
+        return models.Users.create({username, password})
+          .then((newUser) => {
+            console.log('newUser data', newUser);
+          })
           .then((newUser) => {
             res.redirect('/');
           })
